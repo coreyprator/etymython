@@ -8,6 +8,7 @@ import os
 
 from app import models, schemas, crud
 from app.database import engine, get_db, Base
+from app.image_test.routes import router as image_test_router
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -21,9 +22,16 @@ app = FastAPI(
 # Serve static files
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
+# Include image test router
+app.include_router(image_test_router)
+
 @app.get("/app")
 def serve_frontend():
     return FileResponse("frontend/index.html")
+
+@app.get("/gallery")
+def serve_gallery():
+    return FileResponse("frontend/gallery.html")
 
 
 @app.get("/")
