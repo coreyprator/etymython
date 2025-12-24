@@ -130,32 +130,38 @@ async def generate_and_store_image(prompt_id: str) -> dict:
     """
     Full pipeline: generate image, download, create thumbnail, upload to GCS.
     """
-    if prompt_id not in PROMPTS:
-        return {"error": f"Unknown prompt_id: {prompt_id}"}
-    
-    prompt_info = PROMPTS[prompt_id]
-    
-    # Generate with DALL-E
-    result = await generate_single_image(prompt_id, prompt_info["prompt"])
-    
-    if not result["success"]:
-        return result
-    
-    # Download and upload to GCS
-    gcs_result = await download_and_upload_to_gcs(result["image_url"], prompt_id)
-    
-    return {
-        "prompt_id": prompt_id,
-        "category": prompt_info["category"],
-        "style": prompt_info["style"],
-        "prompt": prompt_info["prompt"],
-        "revised_prompt": result["revised_prompt"],
-        "success": True,
-        "full_url": gcs_result["full_url"],
-        "thumb_url": gcs_result["thumb_url"],
-        "dalle_url": result["image_url"],  # Temporary URL, expires
-        "error": None
-    }
+    try:
+        if prompt_id not in PROMPTS:
+            return {"success": False, "error": f"Unknown prompt_id: {prompt_id}"}
+        
+        prompt_info = PROMPTS[prompt_id]
+        
+        # Generate with DALL-E
+        result = await generate_single_image(prompt_id, prompt_info["prompt"])
+        
+        if not result["success"]:
+            return result
+        
+        # Download and upload to GCS
+        gcs_result = await download_and_upload_to_gcs(result["image_url"], prompt_id)
+        
+        return {
+            "prompt_id": prompt_id,
+            "category": prompt_info["category"],
+            "style": prompt_info["style"],
+            "prompt": prompt_info["prompt"],
+            "revised_prompt": result["revised_prompt"],
+            "success": True,
+            "full_url": gcs_result["full_url"],
+            "thumb_url": gcs_result["thumb_url"],
+            "dalle_url": result["image_url"],  # Temporary URL, expires
+            "error": None
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Generation pipeline failed: {type(e).__name__}: {str(e)}"
+        }
 
 async def generate_batch(prompt_ids: list[str], delay_seconds: float = 2.0) -> list[dict]:
     """
