@@ -24,6 +24,7 @@ fonttools==4.60.1
 google-api-core==2.28.1
 google-auth==2.45.0
 google-cloud-core==2.5.0
+google-cloud-secret-manager==2.16.0
 google-cloud-storage==2.10.0
 google-cloud-texttospeech==2.14.1
 google-crc32c==1.8.0
