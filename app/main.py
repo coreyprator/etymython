@@ -193,3 +193,32 @@ def link_figure_to_etymology(figure_id: int, etymology_id: int, db: Session = De
 def link_etymology_to_cognate(etymology_id: int, cognate_id: int, db: Session = Depends(get_db)):
     crud.link_etymology_cognate(db, etymology_id, cognate_id)
     return {"message": "Linked successfully"}
+
+
+@app.get("/api/v1/relationships")
+def get_all_relationships(db: Session = Depends(get_db)):
+    """Get all figure relationships for graph edges"""
+    query = text("""
+        SELECT 
+            fr.figure1_id as source_id,
+            fr.figure2_id as target_id,
+            fr.relationship_type,
+            fr.notes,
+            f1.english_name as source_name,
+            f2.english_name as target_name
+        FROM figure_relationships fr
+        JOIN mythological_figures f1 ON fr.figure1_id = f1.id
+        JOIN mythological_figures f2 ON fr.figure2_id = f2.id
+    """)
+    result = db.execute(query).fetchall()
+    return [
+        {
+            "source_id": row.source_id,
+            "target_id": row.target_id,
+            "relationship_type": row.relationship_type,
+            "notes": row.notes,
+            "source_name": row.source_name,
+            "target_name": row.target_name
+        }
+        for row in result
+    ]

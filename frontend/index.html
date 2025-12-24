@@ -5,6 +5,379 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etymython - Greek Mythology Etymology Explorer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+        }
+        header {
+            background: rgba(0,0,0,0.3);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h1 span { font-size: 0.9rem; opacity: 0.7; }
+        .container { display: flex; height: calc(100vh - 50px); }
+        #cy { flex: 1; background: rgba(0,0,0,0.2); }
+        #sidebar {
+            width: 380px;
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .panel h2 { font-size: 1rem; margin-bottom: 0.8rem; color: #f5576c; }
+        .panel h3 { font-size: 0.9rem; color: #f093fb; margin: 0.8rem 0 0.4rem 0; }
+        .greek-name { font-size: 1.8rem; color: #f093fb; margin-bottom: 0.3rem; }
+        .english-name { font-size: 1.3rem; margin-bottom: 0.3rem; }
+        .meta { color: #888; font-size: 0.85rem; }
+        .domain {
+            display: inline-block;
+            background: rgba(240, 147, 251, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+        }
+        .etymology-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-top: 0.8rem;
+        }
+        .greek-root { font-size: 1.1rem; color: #4ecdc4; }
+        .root-meaning { color: #aaa; font-style: italic; font-size: 0.9rem; }
+        .cognate {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid #4ecdc4;
+            padding: 0.6rem;
+            margin: 0.4rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .cognate-word { font-weight: bold; color: #4ecdc4; font-size: 0.95rem; }
+        .cognate-def { font-size: 0.85rem; color: #ccc; margin: 0.2rem 0; }
+        .derivation { font-size: 0.75rem; color: #888; font-style: italic; }
+        .example { font-size: 0.8rem; color: #999; margin-top: 0.2rem; }
+        .instructions { text-align: center; color: #666; padding: 1.5rem; }
+        .legend { display: flex; gap: 0.8rem; flex-wrap: wrap; font-size: 0.75rem; }
+        .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .ctrl-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .ctrl-btn:hover, .ctrl-btn.active { background: rgba(240, 147, 251, 0.3); }
+        .family-section { margin-top: 0.8rem; }
+        .family-member {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+            cursor: pointer;
+        }
+        .family-member:hover { background: rgba(240, 147, 251, 0.3); }
+        .edge-legend { margin-top: 0.5rem; font-size: 0.7rem; color: #888; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Etymython <span>ΕτυμΎθων</span></h1>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: #f5576c"></div> Olympian</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #7f5af0"></div> Primordial</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #2cb67d"></div> Titan</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #ff8906"></div> Deity</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #e53170"></div> Other</div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="cy"></div>
+        <div id="sidebar">
+            <div class="panel">
+                <h2>View</h2>
+                <div class="controls">
+                    <button class="ctrl-btn active" data-layout="dagre">Family Tree</button>
+                    <button class="ctrl-btn" data-layout="circle">Circle</button>
+                    <button class="ctrl-btn" data-layout="cose">Force</button>
+                </div>
+                <div class="edge-legend">
+                    <span style="color:#f5576c">━</span> parent → child &nbsp;
+                    <span style="color:#4ecdc4">┅</span> spouse
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Filter</h2>
+                <div class="controls">
+                    <button class="ctrl-btn filter-btn active" data-type="all">All</button>
+                    <button class="ctrl-btn filter-btn" data-type="Olympian">Olympian</button>
+                    <button class="ctrl-btn filter-btn" data-type="Primordial">Primordial</button>
+                    <button class="ctrl-btn filter-btn" data-type="Titan">Titan</button>
+                    <button class="ctrl-btn filter-btn" data-type="Deity">Deity</button>
+                </div>
+            </div>
+            
+            <div id="details" class="panel">
+                <div class="instructions">
+                    <p>Click a figure to explore etymology</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://etymython-mnovne7bma-uc.a.run.app';
+        const typeColors = {
+            'Olympian': '#f5576c',
+            'Primordial': '#7f5af0',
+            'Titan': '#2cb67d',
+            'Deity': '#ff8906',
+            'Hero': '#e53170',
+            'Nymph': '#72757e',
+            'Mortal': '#e53170'
+        };
+        
+        let cy;
+        let allFigures = [];
+        let allRelationships = [];
+        
+        async function init() {
+            const [figuresRes, relRes] = await Promise.all([
+                fetch(`${API_BASE}/api/v1/figures`),
+                fetch(`${API_BASE}/api/v1/relationships`)
+            ]);
+            allFigures = await figuresRes.json();
+            allRelationships = await relRes.json();
+            
+            const nodes = allFigures.map(fig => ({
+                data: {
+                    id: `fig-${fig.id}`,
+                    label: fig.english_name,
+                    greekName: fig.greek_name,
+                    figureType: fig.figure_type,
+                    domain: fig.domain,
+                    figureId: fig.id
+                }
+            }));
+            
+            const edges = allRelationships.map((rel, i) => ({
+                data: {
+                    id: `edge-${i}`,
+                    source: `fig-${rel.source_id}`,
+                    target: `fig-${rel.target_id}`,
+                    relType: rel.relationship_type
+                }
+            }));
+            
+            cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: [...nodes, ...edges],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'background-color': (ele) => typeColors[ele.data('figureType')] || '#e53170',
+                            'color': '#fff',
+                            'text-valign': 'bottom',
+                            'text-margin-y': 6,
+                            'font-size': '10px',
+                            'width': 35,
+                            'height': 35,
+                            'border-width': 2,
+                            'border-color': 'rgba(255,255,255,0.3)'
+                        }
+                    },
+                    {
+                        selector: 'node:selected',
+                        style: {
+                            'border-width': 3,
+                            'border-color': '#fff',
+                            'width': 45,
+                            'height': 45
+                        }
+                    },
+                    {
+                        selector: 'node.dimmed',
+                        style: { 'opacity': 0.15 }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'line-color': 'rgba(245, 87, 108, 0.5)',
+                            'target-arrow-color': 'rgba(245, 87, 108, 0.5)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'arrow-scale': 0.8
+                        }
+                    },
+                    {
+                        selector: 'edge[relType = "spouse_of"]',
+                        style: {
+                            'line-color': 'rgba(78, 205, 196, 0.6)',
+                            'line-style': 'dashed',
+                            'target-arrow-shape': 'none'
+                        }
+                    },
+                    {
+                        selector: 'edge.dimmed',
+                        style: { 'opacity': 0.1 }
+                    }
+                ],
+                layout: { name: 'dagre', rankDir: 'TB', nodeSep: 50, rankSep: 80 }
+            });
+            
+            cy.on('tap', 'node', async (evt) => {
+                const node = evt.target;
+                await showFigureDetails(node.data('figureId'));
+            });
+            
+            cy.on('tap', (evt) => {
+                if (evt.target === cy) {
+                    document.getElementById('details').innerHTML = `<div class="instructions"><p>Click a figure to explore etymology</p></div>`;
+                }
+            });
+            
+            document.querySelectorAll('[data-layout]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('[data-layout]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    cy.layout({ 
+                        name: btn.dataset.layout,
+                        rankDir: 'TB',
+                        nodeSep: 50,
+                        rankSep: 80,
+                        animate: true
+                    }).run();
+                });
+            });
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterByType(btn.dataset.type);
+                });
+            });
+        }
+        
+        async function showFigureDetails(figureId) {
+            const response = await fetch(`${API_BASE}/api/v1/figures/${figureId}/chain`);
+            const data = await response.json();
+            
+            // Find family relationships
+            const parents = allRelationships.filter(r => r.target_id === figureId && r.relationship_type === 'parent_of');
+            const children = allRelationships.filter(r => r.source_id === figureId && r.relationship_type === 'parent_of');
+            const spouses = allRelationships.filter(r => 
+                (r.source_id === figureId || r.target_id === figureId) && r.relationship_type === 'spouse_of'
+            );
+            
+            let familyHtml = '';
+            if (parents.length > 0) {
+                familyHtml += `<div class="family-section"><strong>Parents:</strong> ${parents.map(p => 
+                    `<span class="family-member" onclick="showFigureDetails(${p.source_id})">${p.source_name}</span>`
+                ).join('')}</div>`;
+            }
+            if (spouses.length > 0) {
+                familyHtml += `<div class="family-section"><strong>Spouse:</strong> ${spouses.map(s => {
+                    const spouseId = s.source_id === figureId ? s.target_id : s.source_id;
+                    const spouseName = s.source_id === figureId ? s.target_name : s.source_name;
+                    return `<span class="family-member" onclick="showFigureDetails(${spouseId})">${spouseName}</span>`;
+                }).join('')}</div>`;
+            }
+            if (children.length > 0) {
+                familyHtml += `<div class="family-section"><strong>Children:</strong> ${children.map(c => 
+                    `<span class="family-member" onclick="showFigureDetails(${c.target_id})">${c.target_name}</span>`
+                ).join('')}</div>`;
+            }
+            
+            let etymologiesHtml = '';
+            if (data.etymologies && data.etymologies.length > 0) {
+                data.etymologies.forEach(etym => {
+                    let cognatesHtml = etym.cognates?.map(cog => `
+                        <div class="cognate">
+                            <div class="cognate-word">${cog.word}</div>
+                            <div class="cognate-def">${cog.definition || ''}</div>
+                            <div class="derivation">${cog.derivation_path || ''}</div>
+                            ${cog.example_sentence ? `<div class="example">"${cog.example_sentence}"</div>` : ''}
+                        </div>
+                    `).join('') || '';
+                    
+                    etymologiesHtml += `
+                        <div class="etymology-card">
+                            <div class="greek-root">${etym.greek_root}</div>
+                            <div class="root-meaning">"${etym.root_meaning}"</div>
+                            ${etym.cognates?.length ? `<h3>Cognates (${etym.cognates.length})</h3>${cognatesHtml}` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('details').innerHTML = `
+                <div class="greek-name">${data.greek_name || ''}</div>
+                <div class="english-name">${data.english_name}</div>
+                <div class="meta">${data.figure_type || ''}</div>
+                <div class="domain">${data.domain || ''}</div>
+                ${familyHtml}
+                ${etymologiesHtml || '<p style="color:#666; margin-top:1rem">No etymologies linked.</p>'}
+            `;
+        }
+        
+        function filterByType(type) {
+            if (type === 'all') {
+                cy.elements().removeClass('dimmed');
+            } else {
+                cy.nodes().forEach(node => {
+                    if (node.data('figureType') === type) {
+                        node.removeClass('dimmed');
+                    } else {
+                        node.addClass('dimmed');
+                    }
+                });
+                cy.edges().forEach(edge => {
+                    const src = cy.getElementById(edge.data('source'));
+                    const tgt = cy.getElementById(edge.data('target'));
+                    if (src.hasClass('dimmed') || tgt.hasClass('dimmed')) {
+                        edge.addClass('dimmed');
+                    } else {
+                        edge.removeClass('dimmed');
+                    }
+                });
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
     <style>
         * {
             margin: 0;
