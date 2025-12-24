@@ -25,10 +25,14 @@ def get_openai_client():
             client = secretmanager.SecretManagerServiceClient()
             name = "projects/etymython-project/secrets/openai-api-key/versions/latest"
             response = client.access_secret_version(request={"name": name})
-            api_key = response.payload.data.decode("UTF-8")
+            api_key = response.payload.data.decode("UTF-8").strip()
         except Exception as e:
             raise ValueError(f"Could not get OpenAI API key: {e}")
-    return AsyncOpenAI(api_key=api_key)
+    
+    if not api_key:
+        raise ValueError("OpenAI API key is empty")
+    
+    return AsyncOpenAI(api_key=api_key, timeout=60.0)
 
 def get_gcs_client():
     """Get GCS client."""
