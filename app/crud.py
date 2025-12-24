@@ -13,7 +13,7 @@ def get_figure_by_name(db: Session, english_name: str) -> Optional[models.Mythol
 
 
 def get_figures(db: Session, skip: int = 0, limit: int = 100) -> List[models.MythologicalFigure]:
-    return db.query(models.MythologicalFigure).offset(skip).limit(limit).all()
+    return db.query(models.MythologicalFigure).order_by(models.MythologicalFigure.id).offset(skip).limit(limit).all()
 
 
 def get_figures_by_type(db: Session, figure_type: str) -> List[models.MythologicalFigure]:
@@ -54,7 +54,7 @@ def get_etymology(db: Session, etymology_id: int) -> Optional[models.Etymology]:
 
 
 def get_etymologies(db: Session, skip: int = 0, limit: int = 100) -> List[models.Etymology]:
-    return db.query(models.Etymology).offset(skip).limit(limit).all()
+    return db.query(models.Etymology).order_by(models.Etymology.id).offset(skip).limit(limit).all()
 
 
 def create_etymology(db: Session, etymology: schemas.EtymologyCreate) -> models.Etymology:
@@ -75,7 +75,7 @@ def get_cognate_by_word(db: Session, word: str) -> Optional[models.EnglishCognat
 
 
 def get_cognates(db: Session, skip: int = 0, limit: int = 100) -> List[models.EnglishCognate]:
-    return db.query(models.EnglishCognate).offset(skip).limit(limit).all()
+    return db.query(models.EnglishCognate).order_by(models.EnglishCognate.id).offset(skip).limit(limit).all()
 
 
 def create_cognate(db: Session, cognate: schemas.CognateCreate) -> models.EnglishCognate:
