@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import List
 
 from app import models, schemas, crud
@@ -37,6 +38,73 @@ def get_figure(figure_id: int, db: Session = Depends(get_db)):
     if not figure:
         raise HTTPException(status_code=404, detail="Figure not found")
     return figure
+
+
+@app.get("/api/v1/figures/{figure_id}/chain")
+def get_figure_etymology_chain(figure_id: int, db: Session = Depends(get_db)):
+    """Get complete etymology chain: figure → etymologies → cognates"""
+    query = text("""
+        SELECT 
+            f.id as figure_id,
+            f.english_name,
+            f.greek_name,
+            f.figure_type,
+            f.domain,
+            e.id as etymology_id,
+            e.greek_root,
+            e.root_meaning,
+            c.id as cognate_id,
+            c.word as cognate,
+            c.definition,
+            c.part_of_speech,
+            c.example_sentence,
+            ec.derivation_path
+        FROM mythological_figures f
+        LEFT JOIN figure_etymologies fe ON f.id = fe.figure_id
+        LEFT JOIN etymologies e ON fe.etymology_id = e.id
+        LEFT JOIN etymology_cognates ec ON e.id = ec.etymology_id
+        LEFT JOIN english_cognates c ON ec.cognate_id = c.id
+        WHERE f.id = :figure_id
+        ORDER BY e.id, c.word
+    """)
+    
+    result = db.execute(query, {"figure_id": figure_id}).fetchall()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Figure not found")
+    
+    # Structure the response
+    figure_data = {
+        "id": result[0].figure_id,
+        "english_name": result[0].english_name,
+        "greek_name": result[0].greek_name,
+        "figure_type": result[0].figure_type,
+        "domain": result[0].domain,
+        "etymologies": []
+    }
+    
+    etymology_map = {}
+    for row in result:
+        if row.etymology_id and row.etymology_id not in etymology_map:
+            etymology_map[row.etymology_id] = {
+                "id": row.etymology_id,
+                "greek_root": row.greek_root,
+                "root_meaning": row.root_meaning,
+                "cognates": []
+            }
+        
+        if row.cognate_id and row.etymology_id:
+            etymology_map[row.etymology_id]["cognates"].append({
+                "id": row.cognate_id,
+                "word": row.cognate,
+                "definition": row.definition,
+                "part_of_speech": row.part_of_speech,
+                "example_sentence": row.example_sentence,
+                "derivation_path": row.derivation_path
+            })
+    
+    figure_data["etymologies"] = list(etymology_map.values())
+    return figure_data
 
 
 @app.post("/api/v1/figures", response_model=schemas.Figure)
