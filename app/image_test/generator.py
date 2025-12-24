@@ -8,7 +8,7 @@ import httpx
 from datetime import datetime
 from typing import Optional
 from google.cloud import storage
-from openai import OpenAI
+from openai import AsyncOpenAI
 from .prompts import PROMPTS, get_all_prompt_ids
 
 # GCS bucket for images
@@ -16,7 +16,7 @@ BUCKET_NAME = "etymython-media"
 TEST_FOLDER = "style-test"
 
 def get_openai_client():
-    """Get OpenAI client with API key from environment or Secret Manager."""
+    """Get AsyncOpenAI client with API key from environment or Secret Manager."""
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         # Try to get from Secret Manager
@@ -28,7 +28,7 @@ def get_openai_client():
             api_key = response.payload.data.decode("UTF-8")
         except Exception as e:
             raise ValueError(f"Could not get OpenAI API key: {e}")
-    return OpenAI(api_key=api_key)
+    return AsyncOpenAI(api_key=api_key)
 
 def get_gcs_client():
     """Get GCS client."""
@@ -42,7 +42,7 @@ async def generate_single_image(prompt_id: str, prompt_text: str) -> dict:
     client = get_openai_client()
     
     try:
-        response = client.images.generate(
+        response = await client.images.generate(
             model="dall-e-3",
             prompt=prompt_text,
             size="1024x1024",
