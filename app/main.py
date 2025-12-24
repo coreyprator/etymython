@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
+import os
 
 from app import models, schemas, crud
 from app.database import engine, get_db, Base
@@ -14,6 +17,13 @@ app = FastAPI(
     description="Greek mythology etymology learning system",
     version="0.1.0"
 )
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/app")
+def serve_frontend():
+    return FileResponse("frontend/index.html")
 
 
 @app.get("/")

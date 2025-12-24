@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etymython - Greek Mythology Etymology Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h1 span {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+        
+        #cy {
+            flex: 1;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        #sidebar {
+            width: 400px;
+            background: rgba(0,0,0,0.4);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #f5576c;
+        }
+        
+        .panel h3 {
+            font-size: 1rem;
+            color: #f093fb;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .greek-name {
+            font-size: 2rem;
+            color: #f093fb;
+            margin-bottom: 0.5rem;
+        }
+        
+        .english-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .meta {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .domain {
+            display: inline-block;
+            background: rgba(240, 147, 251, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .etymology-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .greek-root {
+            font-size: 1.3rem;
+            color: #4ecdc4;
+        }
+        
+        .root-meaning {
+            color: #aaa;
+            font-style: italic;
+        }
+        
+        .cognate {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid #4ecdc4;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .cognate-word {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .cognate-def {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin: 0.3rem 0;
+        }
+        
+        .derivation {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .example {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.3rem;
+        }
+        
+        .instructions {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .filter-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(240, 147, 251, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Etymython <span>ΕτυμΎθων</span></h1>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: #f5576c"></div> Olympian</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #7f5af0"></div> Primordial</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #2cb67d"></div> Titan</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #ff8906"></div> Deity</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #e53170"></div> Other</div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="cy"></div>
+        <div id="sidebar">
+            <div class="panel">
+                <h2>Filter by Type</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <button class="filter-btn" data-type="Olympian">Olympian</button>
+                    <button class="filter-btn" data-type="Primordial">Primordial</button>
+                    <button class="filter-btn" data-type="Titan">Titan</button>
+                    <button class="filter-btn" data-type="Deity">Deity</button>
+                    <button class="filter-btn" data-type="other">Other</button>
+                </div>
+            </div>
+            
+            <div id="details" class="panel">
+                <div class="instructions">
+                    <p>Click on a figure to explore its etymology</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://etymython-mnovne7bma-uc.a.run.app';
+        
+        const typeColors = {
+            'Olympian': '#f5576c',
+            'Primordial': '#7f5af0',
+            'Titan': '#2cb67d',
+            'Deity': '#ff8906',
+            'Hero': '#e53170',
+            'Nymph': '#72757e',
+            'Mortal': '#e53170'
+        };
+        
+        let cy;
+        let allFigures = [];
+        
+        async function init() {
+            // Fetch all figures
+            const response = await fetch(`${API_BASE}/api/v1/figures`);
+            allFigures = await response.json();
+            
+            // Build graph elements
+            const elements = allFigures.map(fig => ({
+                data: {
+                    id: `fig-${fig.id}`,
+                    label: fig.english_name,
+                    greekName: fig.greek_name,
+                    figureType: fig.figure_type,
+                    domain: fig.domain,
+                    figureId: fig.id
+                }
+            }));
+            
+            // Initialize Cytoscape
+            cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: elements,
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'background-color': (ele) => typeColors[ele.data('figureType')] || '#e53170',
+                            'color': '#fff',
+                            'text-valign': 'bottom',
+                            'text-margin-y': 8,
+                            'font-size': '12px',
+                            'width': 50,
+                            'height': 50,
+                            'border-width': 3,
+                            'border-color': 'rgba(255,255,255,0.3)'
+                        }
+                    },
+                    {
+                        selector: 'node:selected',
+                        style: {
+                            'border-width': 4,
+                            'border-color': '#fff',
+                            'width': 60,
+                            'height': 60
+                        }
+                    },
+                    {
+                        selector: 'node.dimmed',
+                        style: {
+                            'opacity': 0.2
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 2,
+                            'line-color': 'rgba(255,255,255,0.3)',
+                            'curve-style': 'bezier'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'circle',
+                    padding: 50
+                }
+            });
+            
+            // Handle node clicks
+            cy.on('tap', 'node', async (evt) => {
+                const node = evt.target;
+                const figureId = node.data('figureId');
+                await showFigureDetails(figureId);
+            });
+            
+            // Handle background click
+            cy.on('tap', (evt) => {
+                if (evt.target === cy) {
+                    document.getElementById('details').innerHTML = `
+                        <div class="instructions">
+                            <p>Click on a figure to explore its etymology</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterByType(btn.dataset.type);
+                });
+            });
+        }
+        
+        async function showFigureDetails(figureId) {
+            const response = await fetch(`${API_BASE}/api/v1/figures/${figureId}/chain`);
+            const data = await response.json();
+            
+            let etymologiesHtml = '';
+            if (data.etymologies && data.etymologies.length > 0) {
+                data.etymologies.forEach(etym => {
+                    let cognatesHtml = '';
+                    if (etym.cognates && etym.cognates.length > 0) {
+                        etym.cognates.forEach(cog => {
+                            cognatesHtml += `
+                                <div class="cognate">
+                                    <div class="cognate-word">${cog.word}</div>
+                                    <div class="cognate-def">${cog.definition || ''}</div>
+                                    <div class="derivation">${cog.derivation_path || ''}</div>
+                                    ${cog.example_sentence ? `<div class="example">"${cog.example_sentence}"</div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    etymologiesHtml += `
+                        <div class="etymology-card">
+                            <div class="greek-root">${etym.greek_root}</div>
+                            <div class="root-meaning">"${etym.root_meaning}"</div>
+                            <h3>English Cognates (${etym.cognates?.length || 0})</h3>
+                            ${cognatesHtml}
+                        </div>
+                    `;
+                });
+            } else {
+                etymologiesHtml = '<p style="color:#666">No etymologies linked yet.</p>';
+            }
+            
+            document.getElementById('details').innerHTML = `
+                <div class="greek-name">${data.greek_name || ''}</div>
+                <div class="english-name">${data.english_name}</div>
+                <div class="meta">${data.figure_type || ''}</div>
+                <div class="domain">${data.domain || ''}</div>
+                <h3>Etymology</h3>
+                ${etymologiesHtml}
+            `;
+        }
+        
+        function filterByType(type) {
+            if (type === 'all') {
+                cy.nodes().removeClass('dimmed');
+            } else if (type === 'other') {
+                cy.nodes().forEach(node => {
+                    const figType = node.data('figureType');
+                    if (['Olympian', 'Primordial', 'Titan', 'Deity'].includes(figType)) {
+                        node.addClass('dimmed');
+                    } else {
+                        node.removeClass('dimmed');
+                    }
+                });
+            } else {
+                cy.nodes().forEach(node => {
+                    if (node.data('figureType') === type) {
+                        node.removeClass('dimmed');
+                    } else {
+                        node.addClass('dimmed');
+                    }
+                });
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
