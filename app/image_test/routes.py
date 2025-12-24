@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import Optional
 from pydantic import BaseModel
 import asyncio
+import os
 
 from .prompts import PROMPTS, get_all_prompt_ids, get_categories
 from .generator import generate_and_store_image, list_test_images
@@ -48,6 +49,29 @@ async def get_prompt(prompt_id: str) -> PromptInfo:
 async def get_all_categories() -> list[str]:
     """Get all prompt categories."""
     return get_categories()
+
+@router.get("/test-config")
+async def test_config() -> dict:
+    """Test if OpenAI API key is accessible."""
+    has_env_key = bool(os.environ.get("OPENAI_API_KEY"))
+    
+    can_access_secret = False
+    secret_error = None
+    try:
+        from google.cloud import secretmanager
+        client = secretmanager.SecretManagerServiceClient()
+        name = "projects/etymython-project/secrets/openai-api-key/versions/latest"
+        response = client.access_secret_version(request={"name": name})
+        api_key = response.payload.data.decode("UTF-8")
+        can_access_secret = bool(api_key and len(api_key) > 10)
+    except Exception as e:
+        secret_error = str(e)
+    
+    return {
+        "has_env_variable": has_env_key,
+        "can_access_secret_manager": can_access_secret,
+        "secret_manager_error": secret_error
+    }
 
 @router.get("/images")
 async def get_images() -> list[dict]:
