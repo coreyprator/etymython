@@ -10,7 +10,7 @@ from app import models, schemas, crud
 from app.database import engine, get_db, Base
 from app.image_test.routes import router as image_test_router
 from app.image_gen.routes import router as image_gen_router
-from app.image_gen.figure_prompts import FIGURE_PROMPTS, get_figure_relationships
+from app.image_gen.figure_prompts import FIGURE_PROMPTS
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -73,32 +73,6 @@ def seed_database(db: Session = Depends(get_db)):
         )
         db.add(figure)
         figures_created += 1
-    
-    # Add relationships
-    relationships = get_figure_relationships()
-    db.commit()
-    
-    # Add family relationships
-    for greek_name in FIGURE_PROMPTS.keys():
-        figure = db.query(models.MythologicalFigure).filter(
-            models.MythologicalFigure.greek_name == greek_name
-        ).first()
-        
-        if figure and greek_name in relationships:
-            rel_data = relationships[greek_name]
-            if "parents" in rel_data and len(rel_data["parents"]) >= 1:
-                parent1 = db.query(models.MythologicalFigure).filter(
-                    models.MythologicalFigure.greek_name == rel_data["parents"][0]
-                ).first()
-                if parent1:
-                    figure.father_id = parent1.id
-                
-                if len(rel_data["parents"]) >= 2:
-                    parent2 = db.query(models.MythologicalFigure).filter(
-                        models.MythologicalFigure.greek_name == rel_data["parents"][1]
-                    ).first()
-                    if parent2:
-                        figure.mother_id = parent2.id
     
     db.commit()
     
