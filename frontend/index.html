@@ -167,14 +167,17 @@
         let cy;
         let allFigures = [];
         let allRelationships = [];
+        let figureImages = {};
         
         async function init() {
-            const [figuresRes, relRes] = await Promise.all([
+            const [figuresRes, relRes, imagesRes] = await Promise.all([
                 fetch(`${API_BASE}/api/v1/figures`),
-                fetch(`${API_BASE}/api/v1/relationships`)
+                fetch(`${API_BASE}/api/v1/relationships`),
+                fetch(`${API_BASE}/api/v1/images/for-frontend`)
             ]);
             allFigures = await figuresRes.json();
             allRelationships = await relRes.json();
+            figureImages = await imagesRes.json();
             
             const nodes = allFigures.map(fig => ({
                 data: {
@@ -205,23 +208,33 @@
                         style: {
                             'label': 'data(label)',
                             'background-color': (ele) => typeColors[ele.data('figureType')] || '#e53170',
+                            'background-image': (ele) => {
+                                const figureName = ele.data('label');
+                                return figureImages[figureName] ? figureImages[figureName] : 'none';
+                            },
+                            'background-fit': 'cover',
+                            'background-clip': 'node',
                             'color': '#fff',
                             'text-valign': 'bottom',
                             'text-margin-y': 6,
+                            'text-background-color': 'rgba(0,0,0,0.7)',
+                            'text-background-opacity': 1,
+                            'text-background-padding': '3px',
+                            'text-background-shape': 'roundrectangle',
                             'font-size': '10px',
-                            'width': 35,
-                            'height': 35,
-                            'border-width': 2,
-                            'border-color': 'rgba(255,255,255,0.3)'
+                            'width': 50,
+                            'height': 50,
+                            'border-width': 3,
+                            'border-color': (ele) => typeColors[ele.data('figureType')] || '#e53170'
                         }
                     },
                     {
                         selector: 'node:selected',
                         style: {
-                            'border-width': 3,
+                            'border-width': 4,
                             'border-color': '#fff',
-                            'width': 45,
-                            'height': 45
+                            'width': 60,
+                            'height': 60
                         }
                     },
                     {
@@ -341,11 +354,20 @@
                 });
             }
             
+            // Get full portrait image
+            const thumbUrl = figureImages[data.english_name];
+            const fullUrl = thumbUrl ? thumbUrl.replace('/thumbs/', '/full/') : null;
+            const portraitHtml = fullUrl ? 
+                `<div style="text-align:center; margin: 1rem 0;">
+                    <img src="${fullUrl}" alt="${data.english_name}" style="width:100%; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                </div>` : '';
+            
             document.getElementById('details').innerHTML = `
                 <div class="greek-name">${data.greek_name || ''}</div>
                 <div class="english-name">${data.english_name}</div>
                 <div class="meta">${data.figure_type || ''}</div>
                 <div class="domain">${data.domain || ''}</div>
+                ${portraitHtml}
                 ${familyHtml}
                 ${etymologiesHtml || '<p style="color:#666; margin-top:1rem">No etymologies linked.</p>'}
             `;
