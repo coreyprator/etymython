@@ -10,6 +10,7 @@ from app import models, schemas, crud
 from app.database import engine, get_db, Base
 from app.image_test.routes import router as image_test_router
 from app.image_gen.routes import router as image_gen_router
+from app.image_gen.figure_prompts import FIGURE_PROMPTS, get_figure_relationships
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -44,6 +45,68 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+@app.post("/api/v1/seed-database")
+def seed_database(db: Session = Depends(get_db)):
+    """Seed the database with all 44 mythological figures."""
+    # Check if already seeded
+    existing_count = db.query(models.MythologicalFigure).count()
+    if existing_count > 0:
+        return {
+            "message": "Database already seeded",
+            "figure_count": existing_count
+        }
+    
+    # Seed figures
+    figures_created = 0
+    for greek_name, data in FIGURE_PROMPTS.items():
+        figure = models.MythologicalFigure(
+            greek_name=greek_name,
+            english_name=greek_name,  # Using greek name as english for simplicity
+            figure_type=data["figure_type"],
+            description=f"{greek_name}, {data['figure_type'].lower()} from Greek mythology",
+            role="",
+            domain="",
+            symbols="",
+            image_url=None
+        )
+        db.add(figure)
+        figures_created += 1
+    
+    # Add relationships
+    relationships = get_figure_relationships()
+    db.commit()
+    
+    # Add family relationships
+    for greek_name in FIGURE_PROMPTS.keys():
+        figure = db.query(models.MythologicalFigure).filter(
+            models.MythologicalFigure.greek_name == greek_name
+        ).first()
+        
+        if figure and greek_name in relationships:
+            rel_data = relationships[greek_name]
+            if "parents" in rel_data and len(rel_data["parents"]) >= 1:
+                parent1 = db.query(models.MythologicalFigure).filter(
+                    models.MythologicalFigure.greek_name == rel_data["parents"][0]
+                ).first()
+                if parent1:
+                    figure.father_id = parent1.id
+                
+                if len(rel_data["parents"]) >= 2:
+                    parent2 = db.query(models.MythologicalFigure).filter(
+                        models.MythologicalFigure.greek_name == rel_data["parents"][1]
+                    ).first()
+                    if parent2:
+                        figure.mother_id = parent2.id
+    
+    db.commit()
+    
+    return {
+        "message": "Database seeded successfully",
+        "figures_created": figures_created,
+        "next_step": "Generate images at /api/v1/images/generate-all"
+    }
 
 
 # Figures endpoints
