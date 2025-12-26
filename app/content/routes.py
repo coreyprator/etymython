@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 from app.database import get_db
@@ -32,6 +32,16 @@ class BatchContentResponse(BaseModel):
     fun_facts_created: int
     failed: int
     details: List[dict]
+
+
+class UpdateOriginStoryRequest(BaseModel):
+    origin_story: str
+
+
+class UpdateFunFactRequest(BaseModel):
+    content: str
+    category: Optional[str] = None
+    surprise_factor: Optional[int] = None
 
 
 @router.post("/generate-origin-story/{figure_id}", response_model=OriginStoryResponse)
@@ -260,4 +270,116 @@ async def get_content_status(db: Session = Depends(get_db)):
         "total_fun_facts": total_fun_facts,
         "figures_with_fun_facts": figures_with_facts,
         "avg_facts_per_figure": round(total_fun_facts / total if total > 0 else 0, 1)
+    }
+
+
+@router.put("/update-origin-story/{figure_id}")
+async def update_origin_story(
+    figure_id: int,
+    request: UpdateOriginStoryRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Update the origin story for a specific figure.
+    """
+    figure = db.query(models.MythologicalFigure).filter(
+        models.MythologicalFigure.id == figure_id
+    ).first()
+    
+    if not figure:
+        raise HTTPException(status_code=404, detail="Figure not found")
+    
+    figure.origin_story = request.origin_story
+    db.commit()
+    
+    return {
+        "figure_id": figure.id,
+        "figure_name": figure.english_name,
+        "origin_story": figure.origin_story,
+        "message": "Origin story updated successfully"
+    }
+
+
+@router.put("/update-fun-fact/{fact_id}")
+async def update_fun_fact(
+    fact_id: int,
+    request: UpdateFunFactRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Update a specific fun fact.
+    """
+    fact = db.query(models.FunFact).filter(
+        models.FunFact.id == fact_id
+    ).first()
+    
+    if not fact:
+        raise HTTPException(status_code=404, detail="Fun fact not found")
+    
+    fact.content = request.content
+    if request.category is not None:
+        fact.category = request.category
+    if request.surprise_factor is not None:
+        fact.surprise_factor = request.surprise_factor
+    
+    db.commit()
+    
+    return {
+        "fact_id": fact.id,
+        "figure_id": fact.figure_id,
+        "content": fact.content,
+        "category": fact.category,
+        "surprise_factor": fact.surprise_factor,
+        "message": "Fun fact updated successfully"
+    }
+
+
+@router.delete("/delete-origin-story/{figure_id}")
+async def delete_origin_story(
+    figure_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Delete the origin story for a figure (allows regeneration).
+    """
+    figure = db.query(models.MythologicalFigure).filter(
+        models.MythologicalFigure.id == figure_id
+    ).first()
+    
+    if not figure:
+        raise HTTPException(status_code=404, detail="Figure not found")
+    
+    figure.origin_story = None
+    db.commit()
+    
+    return {
+        "figure_id": figure.id,
+        "figure_name": figure.english_name,
+        "message": "Origin story deleted - ready for regeneration"
+    }
+
+
+@router.delete("/delete-fun-fact/{fact_id}")
+async def delete_fun_fact(
+    fact_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Delete a specific fun fact.
+    """
+    fact = db.query(models.FunFact).filter(
+        models.FunFact.id == fact_id
+    ).first()
+    
+    if not fact:
+        raise HTTPException(status_code=404, detail="Fun fact not found")
+    
+    figure_id = fact.figure_id
+    db.delete(fact)
+    db.commit()
+    
+    return {
+        "fact_id": fact_id,
+        "figure_id": figure_id,
+        "message": "Fun fact deleted successfully"
     }
