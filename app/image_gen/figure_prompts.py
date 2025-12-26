@@ -37,7 +37,7 @@ FIGURE_PROMPTS = {
     # TITANS
     "Kronos": {
         "figure_type": "Titan",
-        "prompt": "Studio portrait photography styled like a Renaissance allegory: Kronos, the Titan lord of time who devoured his children, depicted as an ancient powerful figure with world-weary eyes, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: scythe of time, hourglass, ouroboros, harvest sickle, temporal gears. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Kronos, the Titan lord of time and the ages, depicted as an ancient powerful figure with world-weary eyes, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: scythe of time, hourglass, ouroboros serpent, harvest sickle, temporal gears, cycles of time. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
     "Rhea": {
         "figure_type": "Titan",
@@ -53,7 +53,7 @@ FIGURE_PROMPTS = {
     },
     "Hyperion": {
         "figure_type": "Titan",
-        "prompt": "Studio portrait photography styled like a Renaissance allegory: Hyperion, the Titan god of light and watchfulness, depicted as a radiant vigilant figure, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: solar crown, golden rays, all-seeing eyes, celestial light, dawn breaking. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Hyperion, the Titan god of light and observation, depicted as a radiant vigilant figure, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: solar crown, golden rays of sunlight, celestial light, dawn breaking, luminous presence. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
     "Theia": {
         "figure_type": "Titan",
@@ -61,7 +61,7 @@ FIGURE_PROMPTS = {
     },
     "Prometheus": {
         "figure_type": "Titan",
-        "prompt": "Studio portrait photography styled like a Renaissance allegory: Prometheus, the Titan champion of humanity who stole fire, depicted as a defiant noble figure bearing suffering with dignity, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: torch of stolen fire, chain marks, eagle, fennel stalk, foresight wisdom. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Prometheus, the Titan champion of humanity and giver of fire, depicted as a defiant noble figure with foresight and wisdom, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: torch of divine fire, fennel stalk, gifts to humanity, innovation, wisdom and foresight. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
     "Atlas": {
         "figure_type": "Titan",
@@ -163,7 +163,7 @@ FIGURE_PROMPTS = {
     },
     "Perseus": {
         "figure_type": "Hero",
-        "prompt": "Studio portrait photography styled like a Renaissance allegory: Perseus, the hero who slew Medusa, depicted as a youthful triumphant figure with divine favor, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: mirrored shield, winged sandals, kibisis pouch, Medusa head reflection, harpe sword, starry constellation. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Perseus, the legendary hero with divine favor, depicted as a youthful triumphant figure, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: polished shield mirror, winged sandals, magical pouch, harpe sword, starry constellation representing his ascension. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
     "Theseus": {
         "figure_type": "Hero",

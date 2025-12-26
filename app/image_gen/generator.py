@@ -50,9 +50,9 @@ def get_gcs_client():
     """Get GCS client."""
     return storage.Client()
 
-async def generate_figure_image(figure_name: str) -> Dict:
+async def generate_figure_image(figure_name: str, retry_count: int = 0, max_retries: int = 2) -> Dict:
     """
-    Generate a single figure image using DALL-E 3.
+    Generate a single figure image using DALL-E 3 with automatic retry and prompt sanitization.
     Returns dict with success status and image URL.
     """
     if figure_name not in FIGURE_PROMPTS:
@@ -64,6 +64,24 @@ async def generate_figure_image(figure_name: str) -> Dict:
     
     client = get_openai_client()
     prompt_text = FIGURE_PROMPTS[figure_name]["prompt"]
+    
+    # On retry, sanitize prompt by removing potentially problematic words
+    if retry_count > 0:
+        # Remove words that commonly trigger safety filters
+        problematic_terms = [
+            "devoured", "devour", "slew", "slay", "killed", "kill",
+            "suffering", "torture", "pain", "chains", "bound",
+            "severed", "beheaded", "head", "blood", "death",
+            "all-seeing eyes", "watchfulness"
+        ]
+        
+        sanitized = prompt_text
+        for term in problematic_terms:
+            sanitized = sanitized.replace(term, "")
+        
+        # Clean up extra spaces
+        sanitized = " ".join(sanitized.split())
+        prompt_text = sanitized
     
     try:
         response = await client.images.generate(
@@ -82,15 +100,25 @@ async def generate_figure_image(figure_name: str) -> Dict:
             "success": True,
             "image_url": image_url,
             "revised_prompt": revised_prompt,
-            "error": None
+            "error": None,
+            "retry_count": retry_count
         }
     except Exception as e:
+        error_str = str(e)
+        
+        # Check if it's a content policy violation and we can retry
+        if "content_policy_violation" in error_str and retry_count < max_retries:
+            print(f"Safety filter triggered for {figure_name}, retrying with sanitized prompt (attempt {retry_count + 1}/{max_retries})")
+            await asyncio.sleep(1)  # Brief delay before retry
+            return await generate_figure_image(figure_name, retry_count + 1, max_retries)
+        
         return {
             "figure_name": figure_name,
             "success": False,
             "image_url": None,
             "revised_prompt": None,
-            "error": str(e)
+            "error": error_str,
+            "retry_count": retry_count
         }
 
 async def download_and_create_thumbnails(image_url: str, figure_name: str) -> Dict:
