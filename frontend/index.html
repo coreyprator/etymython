@@ -380,8 +380,15 @@
         }
         
         async function showFigureDetails(figureId) {
-            const response = await fetch(`${API_BASE}/api/v1/figures/${figureId}/chain`);
-            const data = await response.json();
+            // Fetch both chain data (for etymologies) and direct data (for origin_story)
+            const chainResponse = await fetch(`${API_BASE}/api/v1/figures/${figureId}/chain`);
+            const chainData = await chainResponse.json();
+            
+            const directResponse = await fetch(`${API_BASE}/api/v1/figures/${figureId}`);
+            const directData = await directResponse.json();
+            
+            // Merge data (chain has etymologies, direct has origin_story)
+            const data = { ...chainData, origin_story: directData.origin_story };
             
             // Fetch fun facts
             let funFacts = [];
