@@ -383,6 +383,17 @@
             const response = await fetch(`${API_BASE}/api/v1/figures/${figureId}/chain`);
             const data = await response.json();
             
+            // Fetch fun facts
+            let funFacts = [];
+            try {
+                const factsResponse = await fetch(`${API_BASE}/api/v1/figures/${figureId}/facts`);
+                if (factsResponse.ok) {
+                    funFacts = await factsResponse.json();
+                }
+            } catch (e) {
+                console.log('No fun facts available');
+            }
+            
             // Find family relationships
             const parents = allRelationships.filter(r => r.target_id === figureId && r.relationship_type === 'parent_of');
             const children = allRelationships.filter(r => r.source_id === figureId && r.relationship_type === 'parent_of');
@@ -446,6 +457,34 @@
                     🔊 Hear Greek Pronunciation
                 </button>` : '';
             
+            // Origin story HTML
+            const originStoryHtml = data.origin_story ? `
+                <div class="panel">
+                    <h2>📜 Origin Story</h2>
+                    <div style="line-height: 1.6; color: #ddd;">${data.origin_story}</div>
+                </div>
+            ` : '';
+            
+            // Fun facts HTML
+            let funFactsHtml = '';
+            if (funFacts.length > 0) {
+                const factsItems = funFacts.map(fact => `
+                    <div class="fun-fact" style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 6px; margin-bottom: 0.6rem; border-left: 3px solid #f5576c;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <span style="font-size: 0.75rem; color: #f093fb; text-transform: uppercase;">${fact.category}</span>
+                            <span style="color: #ffd700;">⭐ ${fact.surprise_factor}/5</span>
+                        </div>
+                        <div style="color: #ddd; line-height: 1.5;">${fact.content}</div>
+                    </div>
+                `).join('');
+                funFactsHtml = `
+                    <div class="panel">
+                        <h2>🎯 Fun Facts</h2>
+                        ${factsItems}
+                    </div>
+                `;
+            }
+            
             document.getElementById('details').innerHTML = `
                 <div class="greek-name">${data.greek_name || ''}</div>
                 <div class="english-name">${data.english_name}</div>
@@ -454,6 +493,8 @@
                 ${audioHtml}
                 ${portraitHtml}
                 ${familyHtml}
+                ${originStoryHtml}
+                ${funFactsHtml}
                 ${etymologiesHtml || '<p style="color:#666; margin-top:1rem">No etymologies linked.</p>'}
             `;
         }
