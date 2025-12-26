@@ -36,6 +36,44 @@
             background: rgba(0,0,0,0.4);
             padding: 1rem;
             overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        #sidebar.floating {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 420px;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            z-index: 1000;
+            cursor: move;
+        }
+        #sidebar.floating .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: move;
+        }
+        .sidebar-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .dock-btn {
+            background: rgba(245, 87, 108, 0.2);
+            border: 1px solid #f5576c;
+            color: #f5576c;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .dock-btn:hover {
+            background: rgba(245, 87, 108, 0.4);
         }
         .panel {
             background: rgba(255,255,255,0.05);
@@ -120,6 +158,12 @@
     <div class="container">
         <div id="cy"></div>
         <div id="sidebar">
+            <div class="sidebar-header" style="display:none;">
+                <span style="color: #f093fb; font-weight: bold; font-size: 0.9rem;">Details</span>
+                <div class="sidebar-controls">
+                    <button class="dock-btn" id="dockToggle">📌 Dock</button>
+                </div>
+            </div>
             <div class="panel">
                 <h2>View</h2>
                 <div class="controls">
@@ -141,6 +185,9 @@
                     <button class="ctrl-btn filter-btn" data-type="Primordial">Primordial</button>
                     <button class="ctrl-btn filter-btn" data-type="Titan">Titan</button>
                     <button class="ctrl-btn filter-btn" data-type="Deity">Deity</button>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <button class="dock-btn" id="floatToggle">🔓 Undock Panel</button>
                 </div>
             </div>
             
@@ -395,6 +442,87 @@
                 });
             }
         }
+        
+        // Draggable sidebar functionality
+        let isDragging = false;
+        let isFloating = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        const sidebar = document.getElementById('sidebar');
+        const floatToggle = document.getElementById('floatToggle');
+        const dockToggle = document.getElementById('dockToggle');
+        const sidebarHeader = sidebar.querySelector('.sidebar-header');
+        
+        floatToggle.addEventListener('click', () => {
+            isFloating = true;
+            sidebar.classList.add('floating');
+            sidebarHeader.style.display = 'flex';
+            floatToggle.style.display = 'none';
+        });
+        
+        dockToggle.addEventListener('click', () => {
+            isFloating = false;
+            sidebar.classList.remove('floating');
+            sidebar.style.transform = '';
+            xOffset = 0;
+            yOffset = 0;
+            sidebarHeader.style.display = 'none';
+            floatToggle.style.display = 'inline-block';
+        });
+        
+        function dragStart(e) {
+            if (!isFloating) return;
+            
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+            
+            if (e.target === sidebarHeader || sidebarHeader.contains(e.target)) {
+                isDragging = true;
+            }
+        }
+        
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+        }
+        
+        function drag(e) {
+            if (!isDragging || !isFloating) return;
+            
+            e.preventDefault();
+            
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+            
+            xOffset = currentX;
+            yOffset = currentY;
+            
+            sidebar.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        }
+        
+        sidebar.addEventListener("mousedown", dragStart, false);
+        sidebar.addEventListener("mouseup", dragEnd, false);
+        sidebar.addEventListener("mousemove", drag, false);
+        
+        sidebar.addEventListener("touchstart", dragStart, false);
+        sidebar.addEventListener("touchend", dragEnd, false);
+        sidebar.addEventListener("touchmove", drag, false);
         
         init();
     </script>
