@@ -9,6 +9,9 @@ class FigureBase(BaseModel):
     latin_name: Optional[str] = None
     english_name: str
     figure_type: Optional[str] = None
+    role: Optional[str] = None
+    description: Optional[str] = None
+    symbols: Optional[str] = None
     domain: Optional[str] = None
     origin_story: Optional[str] = None
     image_url: Optional[str] = None
@@ -24,6 +27,9 @@ class FigureUpdate(BaseModel):
     latin_name: Optional[str] = None
     english_name: Optional[str] = None
     figure_type: Optional[str] = None
+    role: Optional[str] = None
+    description: Optional[str] = None
+    symbols: Optional[str] = None
     domain: Optional[str] = None
     origin_story: Optional[str] = None
     image_url: Optional[str] = None

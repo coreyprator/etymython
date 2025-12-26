@@ -40,6 +40,9 @@ class MythologicalFigure(Base):
     latin_name = Column(String(100))  # Venus
     english_name = Column(String(100), index=True)  # Aphrodite
     figure_type = Column(String(50))  # Olympian, Titan, Primordial, Hero, Creature
+    role = Column(String(200))  # Goddess of Love, Beauty, and Passion
+    description = Column(Text)  # 1-2 sentence summary
+    symbols = Column(String(500))  # roses, doves, scallop shell
     domain = Column(String(200))  # love, beauty, passion
     origin_story = Column(Text)
     image_url = Column(String(500))
