@@ -51,13 +51,28 @@ def health():
 def migrate_schema(db: Session = Depends(get_db)):
     """Add new columns to mythological_figures table"""
     try:
-        # Add role, description, symbols columns
+        # SQL Server syntax - check if column exists first
         db.execute(text("""
-            ALTER TABLE mythological_figures 
-            ADD COLUMN IF NOT EXISTS role VARCHAR(200),
-            ADD COLUMN IF NOT EXISTS description TEXT,
-            ADD COLUMN IF NOT EXISTS symbols VARCHAR(500)
+            IF NOT EXISTS (SELECT * FROM sys.columns 
+                          WHERE object_id = OBJECT_ID('mythological_figures') 
+                          AND name = 'role')
+            ALTER TABLE mythological_figures ADD role VARCHAR(200)
         """))
+        
+        db.execute(text("""
+            IF NOT EXISTS (SELECT * FROM sys.columns 
+                          WHERE object_id = OBJECT_ID('mythological_figures') 
+                          AND name = 'description')
+            ALTER TABLE mythological_figures ADD description TEXT
+        """))
+        
+        db.execute(text("""
+            IF NOT EXISTS (SELECT * FROM sys.columns 
+                          WHERE object_id = OBJECT_ID('mythological_figures') 
+                          AND name = 'symbols')
+            ALTER TABLE mythological_figures ADD symbols VARCHAR(500)
+        """))
+        
         db.commit()
         
         # Verify columns exist
