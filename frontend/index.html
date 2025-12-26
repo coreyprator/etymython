@@ -142,6 +142,35 @@
         }
         .family-member:hover { background: rgba(240, 147, 251, 0.3); }
         .edge-legend { margin-top: 0.5rem; font-size: 0.7rem; color: #888; }
+        .pronunciation-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            color: #4ecdc4;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+            transition: all 0.2s;
+        }
+        .pronunciation-btn:hover {
+            background: rgba(78, 205, 196, 0.4);
+            transform: translateY(-1px);
+        }
+        .pronunciation-btn:active {
+            transform: translateY(0);
+        }
+        .pronunciation-btn.playing {
+            background: rgba(78, 205, 196, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
@@ -410,11 +439,19 @@
                     <img src="${fullUrl}" alt="${data.english_name}" style="width:100%; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
                 </div>` : '';
             
+            // Get full figure data for audio URL
+            const figureData = allFigures.find(f => f.id === figureId);
+            const audioHtml = figureData?.pronunciation_audio_url ? 
+                `<button class="pronunciation-btn" onclick="playPronunciation('${figureData.pronunciation_audio_url}', this)">
+                    🔊 Hear Greek Pronunciation
+                </button>` : '';
+            
             document.getElementById('details').innerHTML = `
                 <div class="greek-name">${data.greek_name || ''}</div>
                 <div class="english-name">${data.english_name}</div>
                 <div class="meta">${data.figure_type || ''}</div>
                 <div class="domain">${data.domain || ''}</div>
+                ${audioHtml}
                 ${portraitHtml}
                 ${familyHtml}
                 ${etymologiesHtml || '<p style="color:#666; margin-top:1rem">No etymologies linked.</p>'}
@@ -442,6 +479,49 @@
                     }
                 });
             }
+        }
+        
+        // Audio playback with visual feedback
+        let currentAudio = null;
+        let currentButton = null;
+        
+        function playPronunciation(audioUrl, button) {
+            // Stop any currently playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                if (currentButton) {
+                    currentButton.classList.remove('playing');
+                    currentButton.innerHTML = '🔊 Hear Greek Pronunciation';
+                }
+            }
+            
+            // Create and play new audio
+            currentAudio = new Audio(audioUrl);
+            currentButton = button;
+            
+            button.classList.add('playing');
+            button.innerHTML = '▶️ Playing...';
+            
+            currentAudio.play().catch(err => {
+                console.error('Audio playback failed:', err);
+                button.classList.remove('playing');
+                button.innerHTML = '🔊 Hear Greek Pronunciation';
+            });
+            
+            currentAudio.addEventListener('ended', () => {
+                button.classList.remove('playing');
+                button.innerHTML = '🔊 Hear Greek Pronunciation';
+                currentAudio = null;
+                currentButton = null;
+            });
+            
+            currentAudio.addEventListener('error', () => {
+                button.classList.remove('playing');
+                button.innerHTML = '❌ Audio Error';
+                currentAudio = null;
+                currentButton = null;
+            });
         }
         
         // Improved draggable sidebar with smooth performance
