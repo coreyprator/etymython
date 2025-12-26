@@ -10,6 +10,7 @@ from app import models, schemas, crud
 from app.database import engine, get_db, Base
 from app.image_test.routes import router as image_test_router
 from app.image_gen.routes import router as image_gen_router
+from app.audio.routes import router as audio_router
 from app.image_gen.figure_prompts import FIGURE_PROMPTS
 
 # Create tables
@@ -27,6 +28,7 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 # Include routers
 app.include_router(image_test_router)
 app.include_router(image_gen_router)
+app.include_router(audio_router)
 
 @app.get("/app")
 def serve_frontend():
