@@ -33,6 +33,18 @@ FIGURE_PROMPTS = {
         "figure_type": "Primordial",
         "prompt": "Studio portrait photography styled like a Renaissance allegory: Erebus, the primordial deity of darkness and shadow, depicted as a mysterious figure shrouded in deep shadows, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: impenetrable darkness, shadow tendrils, moonless night, cave depths. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
+    "Chronos": {
+        "figure_type": "Primordial",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Chronos, the primordial god of time itself, depicted as an eternal ageless figure with cosmic wisdom, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: serpent eating its tail, zodiac wheel, eternal flow, sand streams, cosmic cycles, infinite spiral. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Hypnos": {
+        "figure_type": "Primordial",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Hypnos, the primordial god of sleep, depicted as a peaceful drowsy figure with gentle repose, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: poppy wreath, river Lethe waters, soft wings, dream mist, sleeping torch, quietude. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Thanatos": {
+        "figure_type": "Primordial",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Thanatos, the primordial personification of peaceful passing, depicted as a solemn gentle figure with quiet dignity, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: inverted torch, butterfly, cypress branch, twilight, peaceful repose, gentle release. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
     
     # TITANS
     "Kronos": {
@@ -183,6 +195,10 @@ FIGURE_PROMPTS = {
         "figure_type": "Deity",
         "prompt": "Studio portrait photography styled like a Renaissance allegory: Tyche, goddess of fortune and chance, depicted as an enigmatic figure balancing fate, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: wheel of fortune, cornucopia, rudder of fate, mural crown, dice, changing expression. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
+    "Morpheus": {
+        "figure_type": "Deity",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Morpheus, god of dreams and shapeshifting visions, depicted as an ethereal transforming figure with dreamlike quality, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: poppy flowers, dream mist, shifting forms, sleep wings, ivory gate, morphing shapes. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
     
     # HEROES & MORTALS
     "Heracles": {
@@ -220,6 +236,20 @@ FIGURE_PROMPTS = {
     "Cassandra": {
         "figure_type": "Mortal",
         "prompt": "Studio portrait photography styled like a Renaissance allegory: Cassandra, the tragic prophetess cursed never to be believed, depicted as a desperate impassioned figure with knowing eyes, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: laurel crown, prophetic visions, flames of Troy, unheeded warnings, tragic knowledge, Apollo's curse. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Psyche": {
+        "figure_type": "Mortal",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Psyche, mortal woman who became goddess of the soul, depicted as a beautiful ethereal figure with butterfly wings, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: butterfly wings, oil lamp, rose, trials of love, soul ascending, transformation to immortality. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    
+    # NYMPHS
+    "Echo": {
+        "figure_type": "Nymph",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Echo, mountain nymph cursed to only repeat others' words, depicted as a fading wistful figure with longing expression, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: mountain rocks, voice ripples, narcissus flower, fading form, repeated gestures, pining heart. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Narcissus": {
+        "figure_type": "Hero",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Narcissus, beautiful youth who fell in love with his own reflection, depicted as a stunning self-absorbed figure gazing downward, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: reflecting pool, narcissus flower, mirror image, self-gazing pose, beauty and vanity, transformation to bloom. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
 }
 
