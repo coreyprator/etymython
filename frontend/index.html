@@ -40,14 +40,14 @@
         }
         #sidebar.floating {
             position: fixed;
-            top: 100px;
-            right: 20px;
+            left: auto;
+            top: auto;
             width: 420px;
             max-height: 80vh;
             border-radius: 10px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.6);
             z-index: 1000;
-            cursor: move;
+            will-change: left, top;
         }
         #sidebar.floating .sidebar-header {
             display: flex;
@@ -57,6 +57,7 @@
             margin-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             cursor: move;
+            user-select: none;
         }
         .sidebar-controls {
             display: flex;
@@ -443,86 +444,86 @@
             }
         }
         
-        // Draggable sidebar functionality
-        let isDragging = false;
-        let isFloating = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
-        
+        // Improved draggable sidebar with smooth performance
         const sidebar = document.getElementById('sidebar');
         const floatToggle = document.getElementById('floatToggle');
         const dockToggle = document.getElementById('dockToggle');
         const sidebarHeader = sidebar.querySelector('.sidebar-header');
         
-        floatToggle.addEventListener('click', () => {
+        let isFloating = false;
+        let isDragging = false;
+        let startX, startY, offsetX = 0, offsetY = 0;
+        
+        // Undock button - make panel floating
+        floatToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             isFloating = true;
             sidebar.classList.add('floating');
             sidebarHeader.style.display = 'flex';
-            floatToggle.style.display = 'none';
+            
+            // Position near where clicked if possible, or center-right
+            const rect = sidebar.getBoundingClientRect();
+            offsetX = window.innerWidth - rect.width - 40;
+            offsetY = 100;
+            setTransform(offsetX, offsetY);
         });
         
-        dockToggle.addEventListener('click', () => {
+        // Dock button - return to fixed position
+        dockToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             isFloating = false;
+            isDragging = false;
             sidebar.classList.remove('floating');
             sidebar.style.transform = '';
-            xOffset = 0;
-            yOffset = 0;
+            sidebar.style.left = '';
+            sidebar.style.top = '';
             sidebarHeader.style.display = 'none';
-            floatToggle.style.display = 'inline-block';
+            offsetX = 0;
+            offsetY = 0;
         });
         
-        function dragStart(e) {
+        // Dragging on header only
+        sidebarHeader.addEventListener('mousedown', (e) => {
             if (!isFloating) return;
-            
-            if (e.type === "touchstart") {
-                initialX = e.touches[0].clientX - xOffset;
-                initialY = e.touches[0].clientY - yOffset;
-            } else {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
-            }
-            
-            if (e.target === sidebarHeader || sidebarHeader.contains(e.target)) {
-                isDragging = true;
-            }
-        }
+            isDragging = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+            sidebarHeader.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
         
-        function dragEnd(e) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-        }
-        
-        function drag(e) {
+        document.addEventListener('mousemove', (e) => {
             if (!isDragging || !isFloating) return;
             
             e.preventDefault();
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
             
-            if (e.type === "touchmove") {
-                currentX = e.touches[0].clientX - initialX;
-                currentY = e.touches[0].clientY - initialY;
-            } else {
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
+            // Use RAF for smooth animation
+            requestAnimationFrame(() => {
+                setTransform(offsetX, offsetY);
+            });
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                sidebarHeader.style.cursor = 'move';
             }
+        });
+        
+        function setTransform(x, y) {
+            // Keep panel within viewport bounds
+            const rect = sidebar.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
             
-            xOffset = currentX;
-            yOffset = currentY;
+            x = Math.max(0, Math.min(x, maxX));
+            y = Math.max(0, Math.min(y, maxY));
             
-            sidebar.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            sidebar.style.left = x + 'px';
+            sidebar.style.top = y + 'px';
         }
-        
-        sidebar.addEventListener("mousedown", dragStart, false);
-        sidebar.addEventListener("mouseup", dragEnd, false);
-        sidebar.addEventListener("mousemove", drag, false);
-        
-        sidebar.addEventListener("touchstart", dragStart, false);
-        sidebar.addEventListener("touchend", dragEnd, false);
-        sidebar.addEventListener("touchmove", drag, false);
         
         init();
     </script>
