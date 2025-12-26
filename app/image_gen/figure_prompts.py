@@ -67,6 +67,42 @@ FIGURE_PROMPTS = {
         "figure_type": "Titan",
         "prompt": "Studio portrait photography styled like a Renaissance allegory: Atlas, the Titan condemned to bear the heavens on his shoulders, depicted as a muscular strained figure with cosmic burden, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: celestial sphere, star-map, shoulders bearing weight, mountain strength, endurance. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
     },
+    "Coeus": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Coeus, the Titan god of intellect and the axis of heaven, depicted as a contemplative scholarly figure with celestial wisdom, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: celestial axis, astronomical instruments, stars of north pole, intellectual pursuit, cosmic knowledge. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Cronus": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Cronus, the Titan king of the golden age, depicted as a powerful sovereign figure with timeless authority, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: golden sickle, harvest abundance, royal sovereignty, cycles of ages, temporal power. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Iapetus": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Iapetus, the Titan god of mortality and craftsmanship, depicted as a strong ancient figure with skilled hands, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: spear of mortality, western pillar, artisan tools, ancestral wisdom, crafted works. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Mnemosyne": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Mnemosyne, the Titan goddess of memory and remembrance, depicted as a serene wise figure with timeless knowledge, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: scroll of memory, lamp of remembrance, pool of reflection, muses' inspiration, eternal records. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Phoebe": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Phoebe, the Titan goddess of prophetic intellect and bright light, depicted as a luminous prophetic figure with mystic insight, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: prophetic laurel crown, silver moonlight, oracle's wisdom, divine insight, celestial radiance. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Themis": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Themis, the Titan goddess of divine law and order, depicted as a majestic authoritative figure with balanced judgment, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: scales of justice, sword of law, blindfold of impartiality, stone tablets, divine order. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Helios": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Helios, the Titan god of the sun, depicted as a radiant powerful figure with solar majesty, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: sun crown with rays, golden chariot reins, blazing orb, dawn and dusk, illuminating light. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Selene": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: Selene, the Titan goddess of the moon, depicted as an ethereal silvery figure with lunar grace, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: crescent moon diadem, lunar chariot, silver cloak, night sky, gentle moonbeams. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
+    "Titan": {
+        "figure_type": "Titan",
+        "prompt": "Studio portrait photography styled like a Renaissance allegory: A Titan, the elder gods who preceded the Olympians, depicted as an ancient powerful primordial figure of immense stature, in neutral backdrop, dramatic Rembrandt lighting, centered bust composition filling 70% of frame. Symbolism: mountain peaks, cosmic power, primordial strength, ancient wisdom, eternal endurance. Ultra sharp, museum-quality, high contrast for thumbnail visibility, no text."
+    },
     
     # OLYMPIANS - PRIMARY DEITIES
     "Zeus": {
