@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
@@ -43,7 +43,7 @@ def serve_gallery():
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to Etymython", "status": "running"}
+    return RedirectResponse(url="/app")
 
 
 @app.get("/health")
