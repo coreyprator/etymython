@@ -47,6 +47,38 @@ def health():
     return {"status": "healthy"}
 
 
+@app.post("/api/v1/migrate-schema")
+def migrate_schema(db: Session = Depends(get_db)):
+    """Add new columns to mythological_figures table"""
+    try:
+        # Add role, description, symbols columns
+        db.execute(text("""
+            ALTER TABLE mythological_figures 
+            ADD COLUMN IF NOT EXISTS role VARCHAR(200),
+            ADD COLUMN IF NOT EXISTS description TEXT,
+            ADD COLUMN IF NOT EXISTS symbols VARCHAR(500)
+        """))
+        db.commit()
+        
+        # Verify columns exist
+        result = db.execute(text("""
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'mythological_figures' 
+            AND column_name IN ('role', 'description', 'symbols')
+        """))
+        
+        columns = [dict(row._mapping) for row in result]
+        
+        return {
+            "message": "Schema migration completed successfully",
+            "columns_added": columns
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Migration failed: {str(e)}")
+
+
 @app.post("/api/v1/seed-database")
 def seed_database(db: Session = Depends(get_db)):
     """Seed the database with all 44 mythological figures."""
